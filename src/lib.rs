@@ -88,3 +88,59 @@ fn ring_buffer(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_class::<RingBuffer>()?;
     Ok(())
 }
+
+#[cfg(test)]
+mod tests {
+    use pyo3::ToPyObject;
+
+    use super::*;
+
+    #[test]
+    fn construct() {
+        let rb = RingBuffer::new(5);
+        assert_eq!(rb.data.len(), 0)
+    }
+
+    #[test]
+    fn overwrites_oldest() {
+        pyo3::prepare_freethreaded_python();
+        Python::with_gil(|py| {
+            let mut rb = RingBuffer::new(5);
+            (0..6).for_each(|i| {
+                rb.push(i.to_object(py));
+            });
+            assert_eq!(
+                rb.data,
+                vec![5, 1, 2, 3, 4]
+                    .iter()
+                    .map(|i| i.to_object(py))
+                    .collect::<Vec<PyObject>>()
+            )
+        });
+    }
+
+    #[test]
+    fn capacity_unchanged() {
+        pyo3::prepare_freethreaded_python();
+        Python::with_gil(|py| {
+            let mut rb = RingBuffer::new(5);
+            (0..500).for_each(|i| {
+                rb.push(i.to_object(py));
+            });
+            assert_eq!(rb.data.capacity(), 5);
+            assert_eq!(rb.data.len(), 5);
+        });
+    }
+
+    #[test]
+    fn samples() {
+        pyo3::prepare_freethreaded_python();
+        Python::with_gil(|py| {
+            let mut rb = RingBuffer::new(5);
+            (0..5).for_each(|i| {
+                rb.push(i.to_object(py));
+            });
+            assert_eq!(rb.sample(3).len(), 3);
+        });
+    }
+}
