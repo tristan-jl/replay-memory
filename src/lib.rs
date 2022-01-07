@@ -44,19 +44,21 @@ impl RingBuffer {
         }
     }
 
-    pub fn is_full(&self) -> bool {
-        self.data.len() == self.data.capacity()
-    }
-
-    pub fn is_empty(&self) -> bool {
-        self.data.is_empty()
-    }
-
     pub fn sample(&self, sample_size: usize) -> Vec<PyObject> {
         self.data
             .choose_multiple(&mut rand::thread_rng(), sample_size)
             .cloned()
             .collect()
+    }
+
+    #[getter]
+    pub fn is_full(&self) -> bool {
+        self.data.len() == self.data.capacity()
+    }
+
+    #[getter]
+    pub fn is_empty(&self) -> bool {
+        self.data.is_empty()
     }
 
     pub fn __getitem__(&self, idx: usize) -> PyResult<&PyObject> {
