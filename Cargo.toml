@@ -1,10 +1,10 @@
 [package]
-name = "ring-buffer"
+name = "replay-memory"
 version = "0.1.0"
 edition = "2021"
 
 [lib]
-name = "ring_buffer"
+name = "replay_memory"
 crate-type = ["cdylib"]
 
 [dependencies]

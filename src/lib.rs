@@ -7,13 +7,13 @@ use rand::seq::SliceRandom;
 
 #[pyclass]
 #[derive(Debug)]
-pub struct RingBuffer {
+pub struct ReplayMemory {
     index: usize,
     data: Vec<PyObject>,
 }
 
 #[pymethods]
-impl RingBuffer {
+impl ReplayMemory {
     #[new]
     pub fn new(capacity: usize) -> Self {
         Self {
@@ -70,7 +70,7 @@ impl RingBuffer {
     }
 
     pub fn __repr__(&self) -> PyResult<String> {
-        let mut repr = String::from("RingBuffer([");
+        let mut repr = String::from("ReplayMemory([");
         let mut items = self.data.iter().peekable();
 
         while let Some(item) = items.next() {
@@ -86,8 +86,8 @@ impl RingBuffer {
 }
 
 #[pymodule]
-fn ring_buffer(_py: Python, m: &PyModule) -> PyResult<()> {
-    m.add_class::<RingBuffer>()?;
+fn replay_memory(_py: Python, m: &PyModule) -> PyResult<()> {
+    m.add_class::<ReplayMemory>()?;
     Ok(())
 }
 
@@ -98,16 +98,10 @@ mod tests {
     use super::*;
 
     #[test]
-    fn construct() {
-        let rb = RingBuffer::new(5);
-        assert_eq!(rb.data.len(), 0)
-    }
-
-    #[test]
     fn overwrites_oldest() {
         pyo3::prepare_freethreaded_python();
         Python::with_gil(|py| {
-            let mut rb = RingBuffer::new(5);
+            let mut rb = ReplayMemory::new(5);
             (0..6).for_each(|i| {
                 rb.push(i.to_object(py));
             });
@@ -125,7 +119,7 @@ mod tests {
     fn capacity_unchanged() {
         pyo3::prepare_freethreaded_python();
         Python::with_gil(|py| {
-            let mut rb = RingBuffer::new(5);
+            let mut rb = ReplayMemory::new(5);
             (0..500).for_each(|i| {
                 rb.push(i.to_object(py));
             });
@@ -138,7 +132,7 @@ mod tests {
     fn samples() {
         pyo3::prepare_freethreaded_python();
         Python::with_gil(|py| {
-            let mut rb = RingBuffer::new(5);
+            let mut rb = ReplayMemory::new(5);
             (0..5).for_each(|i| {
                 rb.push(i.to_object(py));
             });
