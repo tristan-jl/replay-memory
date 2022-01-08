@@ -5,6 +5,7 @@ use pyo3::{
 
 use rand::seq::SliceRandom;
 
+/// Simple replay memory data structure
 #[pyclass]
 #[derive(Debug)]
 pub struct ReplayMemory {
@@ -14,6 +15,14 @@ pub struct ReplayMemory {
 
 #[pymethods]
 impl ReplayMemory {
+    /// Returns a replay memory instance with the given capacity.
+    ///
+    /// Note that the size of the replay memory may be less than the capacity until it
+    /// is filled.
+    ///
+    /// # Arguments
+    ///
+    /// * `capacity` - The capacity of the replay memory
     #[new]
     pub fn new(capacity: usize) -> Self {
         Self {
@@ -22,12 +31,24 @@ impl ReplayMemory {
         }
     }
 
+    /// Returns the item at the given index.
+    ///
+    /// # Arguments
+    ///
+    /// * `index` - The index of the item to retrieve
     pub fn get(&self, index: usize) -> PyResult<&PyObject> {
         self.data
             .get(index)
             .ok_or_else(|| PyIndexError::new_err("index is out of range"))
     }
 
+    /// Pushes an item in to the replay memory.
+    ///
+    /// Overwrites the oldest data if the memory is at capacity.
+    ///
+    /// # Arguments
+    ///
+    /// * `item` - The item to push in
     pub fn push(&mut self, item: PyObject) {
         if !self.is_full() {
             self.data.push(item)
@@ -38,12 +59,23 @@ impl ReplayMemory {
         self.index %= self.data.capacity();
     }
 
+    /// Convenience method wrapping `push`, allowing for multiple items to be pushed at
+    /// once.
+    ///
+    /// # Arguments
+    ///
+    /// * `items` - The items to push in
     pub fn push_items(&mut self, items: Vec<PyObject>) {
         for item in items {
             self.push(item);
         }
     }
 
+    /// Returns a randomly selected sample of items from the replay memory.
+    ///
+    /// # Arguments
+    ///
+    /// * `sample_size` - The size of the sample
     pub fn sample(&self, sample_size: usize) -> Vec<PyObject> {
         self.data
             .choose_multiple(&mut rand::thread_rng(), sample_size)
@@ -51,11 +83,13 @@ impl ReplayMemory {
             .collect()
     }
 
+    /// Returns whether the replay memory is at capacity
     #[getter]
     pub fn is_full(&self) -> bool {
         self.data.len() == self.data.capacity()
     }
 
+    /// Returns whether the replay memory is empty
     #[getter]
     pub fn is_empty(&self) -> bool {
         self.data.is_empty()
