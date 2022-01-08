@@ -1,3 +1,7 @@
+__pycache__/
+/.mypy_cache
+/.pytest_cache
+/.tox
 /target
 /venv
 Cargo.lock
