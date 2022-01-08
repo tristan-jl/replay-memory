@@ -15,12 +15,12 @@ jobs:
         with:
           manylinux: auto
           command: build
-          args: --release -o dist
+          args: --release
       - name: Upload wheels
         uses: actions/upload-artifact@v2
         with:
           name: wheels
-          path: dist
+          path: target/wheels/replay_memory*.whl
 
   windows:
     runs-on: windows-latest
@@ -29,12 +29,12 @@ jobs:
       - uses: messense/maturin-action@v1
         with:
           command: build
-          args: --release --no-sdist -o dist
+          args: --release --no-sdist
       - name: Upload wheels
         uses: actions/upload-artifact@v2
         with:
           name: wheels
-          path: dist
+          path: target/wheels/replay_memory*.whl
 
   macos:
     runs-on: macos-latest
@@ -43,12 +43,12 @@ jobs:
       - uses: messense/maturin-action@v1
         with:
           command: build
-          args: --release --no-sdist -o dist --universal2
+          args: --release --no-sdist --universal2
       - name: Upload wheels
         uses: actions/upload-artifact@v2
         with:
           name: wheels
-          path: dist
+          path: target/wheels/replay_memory*.whl
 
   release:
     name: Release
